@@ -1,0 +1,71 @@
+## Инструкции по запуску пайплана по регистрации набора облаков точек.
+
+Мне не удалось заставить работать teaserpp_python. Он вылетал на моменте вызова _solver.getSolution()_. Поэтому исходники исполняемого файла написаны на C++, а сам исполняемый файл вызывается через Python c необходимой чтением-записью облаков в _tempfile.TemporaryDirectory()_.
+
+### Компиляция исполняемого файла для регистрации пары облаков.
+Необходимо установить библиотеки: [TEASER-plusplus](https://github.com/MIT-SPARK/TEASER-plusplus) и [PCL](https://github.com/PointCloudLibrary/pcl)
+
+
+Перейдите в каталог `teaser_register` и выполните сборку:
+
+```bash
+cd ./teaser_register
+mkdir build && cd build
+cmake .. && make
+```
+
+После успешной сборки исполняемый файл `teaser_register` будет находиться в `teaser_register/build`.
+
+Сам пайплайн регистрации следующий:
+
+```mermaid
+flowchart LR
+    A([N облаков]) --> B{Есть что<br/>слить?}
+    B -- Да --> C[Пробные слияния<br/>всех пар]
+    C --> D[Выбор лучшей пары<br/>по метрикам]
+    D --> E[Заменить пару<br/>одним облаком]
+    E --> F{N = 1 ?}
+    F -- Нет --> B
+    F -- Да --> G([Готово])
+    B -- Нет --> G
+
+    classDef se fill:#dbeafe,stroke:#1e40af,stroke-width:2px,color:#0f172a;
+    classDef de fill:#fef3c7,stroke:#b45309,stroke-width:2px,color:#0f172a;
+    classDef ac fill:#dcfce7,stroke:#166534,stroke-width:1.5px,color:#0f172a;
+    class A,G se;
+    class B,F de;
+    class C,D,E ac;
+```
+
+Решение о слиянии двух облаков принимает небольшая предобученная MLP-сеть
+(`SimpleMLP`, чекпоинт `checkpoints/final.pt`). На вход подаются 6 метрик,
+вычисленных после пробной регистрации пары через TEASER++ — по три «в каждую
+сторону» (`fwd` / `bwd`). 
+
+| Признак | Диапазон | Что измеряет |
+|---|---|---|
+| `icp_fitness_fwd` | `[0, 1]` | Доля точек выровненного source-облака, у которых в target-облаке нашёлся сосед в радиусе 0.5 м (`evaluate_registration`, направление fwd). |
+| `icp_fitness_bwd` | `[0, 1]` | То же, но в обратном направлении (target → source). Симметричен fwd, но не идентичен: разные плотности и перекрытия. |
+| `normal_score` | `[0, 1]` | Согласованность нормалей поверхностей в точках-соответствиях. Усреднённая косинусная близость нормалей source и target. |
+| `normal_mean_angle_deg` | `[0, 180]°` | Средний угол между нормалями в соответствующих точках. Дополняет `normal_score`, но в градусах — удобно для порогов. |
+| `fsv_rate_fwd` | `[0, 1]` | Доля поз траектории `i`, перенесённой в фрейм `j`, в которых луч из камеры упирается в занятое пространство (free-space violation). По сути — «сколько поз противоречат геометрии target-облака». |
+| `fsv_rate_bwd` | `[0, 1]` | То же для траектории `j` относительно облака `i` после обратного преобразования. |
+
+В качестве метрики качества слияния для поиска наилудшей из возможных берется выход из нейронной сети. Порог слияния — `merge_prob_threshold` (по умолчанию 0.5).
+
+Данные для обучения взяты из открытых датасетов c лидаром MID360: [dataset1](https://zenodo.org/records/14841855), [dataset2](https://drive.google.com/file/d/1sF2Z5VT8W_Ywhjwg7PR3yG3tT2m5vLWY/view).
+
+От вас требуется поменять только следующие строки с путями к облакам точек `cloud_paths` и траекториям в них `traj_paths`. Пример:
+```python
+    ROOT = "/home/alex/Geoscan/code_cpp/geoscan_flight/cave/"
+
+    ids = [i for i in range(8)]
+    cloud_paths = [ROOT + f"raw/bag_{i}.pcd" for i in ids]
+    traj_paths  = [ROOT + f"paths/path_{i}.txt" for i in ids]
+```
+
+Запуск пайплайна:
+```bash
+cd ./code
+python cloud_registration.py
+```
