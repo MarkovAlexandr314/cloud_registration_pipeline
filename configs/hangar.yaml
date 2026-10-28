@@ -1,0 +1,68 @@
+# ============================================================
+# Пути (все обязательные — прописывает пользователь)
+# ============================================================
+teaser_bin:     /home/alex/Geoscan/libs/TEASER-plusplus/my_tools/build/teaser_register
+checkpoint_dir: ../checkpoints
+output_dir:     ../output
+
+# ============================================================
+# Параметры TEASER++
+# ============================================================
+teaser:
+  voxel:        0.3
+  noise_bound:  0.5
+
+# ============================================================
+# Параметры слияния
+# ============================================================
+merge:
+  prob_threshold:    0.5      # порог вероятности сети
+  fsv_rate_hard_max: 0.95     # жёсткий отсев по FSV до вызова сети
+  fsv_max_poses:     100
+  fsv_max_rays:      30
+  max_iterations:    15
+
+# ============================================================
+# Сессии: одна запись = пара (облако + траектория)
+# id — целое, произвольное, используется как внутренний ключ
+# ============================================================
+sessions:
+  - id: 0
+    cloud: /home/alex/Geoscan/code_cpp/geoscan_flight/hangar/ros_2_3/downsampled/cloud_11.pcd
+    traj:  /home/alex/Geoscan/code_cpp/geoscan_flight/hangar/ros_2_3/paths/path_11.txt
+
+  - id: 1
+    cloud: /home/alex/Geoscan/code_cpp/geoscan_flight/hangar/ros_2_3/downsampled/cloud_13.pcd
+    traj:  /home/alex/Geoscan/code_cpp/geoscan_flight/hangar/ros_2_3/paths/path_13.txt
+
+  - id: 2
+    cloud: /home/alex/Geoscan/code_cpp/geoscan_flight/hangar/ros_2_3/downsampled/cloud_14.pcd
+    traj:  /home/alex/Geoscan/code_cpp/geoscan_flight/hangar/ros_2_3/paths/path_14.txt
+
+  - id: 3
+    cloud: /home/alex/Geoscan/code_cpp/geoscan_flight/hangar/ros_2_3/downsampled/cloud_15.pcd
+    traj:  /home/alex/Geoscan/code_cpp/geoscan_flight/hangar/ros_2_3/paths/path_15.txt
+
+  - id: 4
+    cloud: /home/alex/Geoscan/code_cpp/geoscan_flight/hangar/ros_2_3/downsampled/cloud_16.pcd
+    traj:  /home/alex/Geoscan/code_cpp/geoscan_flight/hangar/ros_2_3/paths/path_16.txt
+
+  - id: 5
+    cloud: /home/alex/Geoscan/code_cpp/geoscan_flight/hangar/ros_2_3/downsampled/cloud_20.pcd
+    traj:  /home/alex/Geoscan/code_cpp/geoscan_flight/hangar/ros_2_3/paths/path_20.txt
+
+  - id: 6
+    cloud: /home/alex/Geoscan/code_cpp/geoscan_flight/hangar/ros_2_3/downsampled/cloud_21.pcd
+    traj:  /home/alex/Geoscan/code_cpp/geoscan_flight/hangar/ros_2_3/paths/path_21.txt
+
+  - id: 7
+    cloud: /home/alex/Geoscan/code_cpp/geoscan_flight/hangar/ros_2_3/downsampled/cloud_22.pcd
+    traj:  /home/alex/Geoscan/code_cpp/geoscan_flight/hangar/ros_2_3/paths/path_22.txt
+
+  - id: 8
+    cloud: /home/alex/Geoscan/code_cpp/geoscan_flight/hangar/ros_2_3/downsampled/cloud_23.pcd
+    traj:  /home/alex/Geoscan/code_cpp/geoscan_flight/hangar/ros_2_3/paths/path_23.txt
+
+  - id: 9
+    cloud: /home/alex/Geoscan/code_cpp/geoscan_flight/hangar/ros_2_3/downsampled/cloud_24.pcd
+    traj:  /home/alex/Geoscan/code_cpp/geoscan_flight/hangar/ros_2_3/paths/path_24.txt
